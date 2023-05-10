@@ -1,17 +1,25 @@
-
+/*
 //objeto literal
 const datos={
     nombre:'Juan',
     apellido:'Perez',
     edad:25,
 }
+*/
 
 const URLbase='https://rickandmortyapi.com/api/'
-const endPointPersonajes='character'
+let endPointPersonajes='character'
 
 const contenedor=document.getElementById('contenedor')
-const anterior=document.getElementById('anterior')
-const siguiente=document.getElementById('siguiente')
+const btnAnterior=document.getElementById('btnAnterior')
+const btnSiguiente=document.getElementById('btnSiguiente')
+let linkSig=''
+let linkAnt=''
+
+let buscar=document.getElementById('buscar')
+let nombre=document.getElementById('nombre')
+
+//const queryId=(id)=>document.getElementById(id)//opcion para llamar a todos los id juntos
 
 
 //json
@@ -19,21 +27,25 @@ const siguiente=document.getElementById('siguiente')
 
 //console.log('hola')//asincronismo
 
-let pagina=1
 
-const getPersonaje = () => { 
 
-    fetch(`${URLbase}${endPointPersonajes}`)
-    .then((response)=>response.json())
-    .then((data)=>mostrarPesonaje(data.results))
-    .catch((error)=>console.log(error))
-    .finally(()=>console.log("finalizo la conexion a la api"))
+
+//guardamos el fetch en una funcion para que no se ejecute cada vez que inicia la pagina
+const getPersonajes = (pagina) => {
+    console.log(pagina)
+    fetch(pagina)
+    .then(response=>response.json()) //lo traemos a json
+    .then(data=>mostrarPersonajes(data))
+    .catch(error=>console.log(error)) //chequea errores que provienen de la api
+    .finally(()=>console.log('finalizo la conexion a la api')) //da por finalizado el consumo de la api
 }
-getPersonaje()
 
-const mostrarPesonaje = (personajes) => { 
-    for(let personaje of personajes){
-        console.log(personaje.name)
+getPersonajes(URLbase+endPointPersonajes)
+
+const mostrarPersonajes = (data) => {
+    let personajes = data.results
+    contenedor.innerHTML=''
+    for(let personaje of personajes){        
         contenedor.innerHTML+=`
         <div class="card m-3" style="width: 18rem;">
         <div class="card" style="width: 18rem;">
@@ -42,25 +54,26 @@ const mostrarPesonaje = (personajes) => {
           <h5 class="card-title">${personaje.name}</h5>
           <p class="card-text">${personaje.status}</p>
           <p class="card-text">${personaje.gender}</p>
-          
           <a href="#" class="btn btn-primary">Go somewhere</a>
         </div>
-        </div>
+      </div>
       </div>`
     }
-
+    linkSig = data.info.next
+    linkAnt = data.info.prev
 }
 
-const siguientePagina = () => {
-    pagina++
-    fetch(`${URLbase}${endPointPersonajes}/?page=${pagina}`)
-    .then((response)=>response.json())
-    .then((data)=>mostrarPesonaje(data.results))
-    .catch((error)=>console.log(error))
-    .finally(()=>console.log("finalizo la conexion a la api"))
-}
+btnSiguiente.addEventListener('click', () =>{
+  getPersonajes(linkSig)  
+})
 
-siguiente.addEventListener('click',siguientePagina)
+btnAnterior.addEventListener('click', () =>{
+  getPersonajes(linkAnt)
+})
+
+buscar.addEventListener('click', () =>{
+  getPersonajes(`${URLbase}character?name=${nombre.value}`)
+})
 //console.log('chau')
 
 //get ==>  traer o obtener datos
